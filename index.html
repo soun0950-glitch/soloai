@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoloAI — 1인 창업자 AI 도구</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f3ef;
+  --bg2: #eceae4;
+  --bg3: #fff;
+  --text: #1a1a18;
+  --text2: #6b6b65;
+  --text3: #9e9e97;
+  --border: rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.06);
+  --accent: #2d5a3d;
+  --accent-bg: #edf3ef;
+  --accent2: #c8a96e;
+  --danger: #c0392b;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ── AUTH ── */
+.auth-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+.auth-box {
+  background: var(--bg3);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.06);
+}
+.auth-logo {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.auth-logo span { color: var(--accent); font-style: italic; }
+.auth-tagline {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 2rem;
+}
+.auth-tabs {
+  display: flex;
+  background: var(--bg2);
+  border-radius: var(--radius);
+  padding: 3px;
+  margin-bottom: 1.5rem;
+}
+.auth-tab {
+  flex: 1;
+  padding: 7px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text2);
+  font-weight: 400;
+  transition: all .15s;
+}
+.auth-tab.active {
+  background: var(--bg3);
+  color: var(--text);
+  font-weight: 500;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; }
+.field input {
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s;
+}
+.field input:focus { border-color: var(--accent); background: var(--bg3); }
+.btn-main {
+  width: 100%;
+  padding: 11px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: opacity .15s;
+  margin-top: 4px;
+}
+.btn-main:hover { opacity: .88; }
+.btn-main:disabled { opacity: .45; cursor: not-allowed; }
+.auth-err { font-size: 12px; color: var(--danger); margin-top: 8px; min-height: 16px; }
+.demo-hint {
+  margin-top: 1rem;
+  padding: 10px 12px;
+  background: var(--accent-bg);
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: var(--accent);
+  text-align: center;
+}
+
+/* ── APP SHELL ── */
+.app { display: none; min-height: 100vh; }
+.app.visible { display: flex; flex-direction: column; }
+
+.topbar {
+  background: var(--bg3);
+  border-bottom: 0.5px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-logo {
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px;
+  color: var(--text);
+}
+.topbar-logo span { color: var(--accent); font-style: italic; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.user-name { font-size: 13px; color: var(--text2); }
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 500;
+  border: 0.5px solid rgba(45,90,61,0.2);
+}
+.logout-btn {
+  font-size: 12px;
+  color: var(--text3);
+  background: none;
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all .15s;
+}
+.logout-btn:hover { background: var(--bg2); color: var(--text2); }
+
+.main { display: flex; flex: 1; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  border-right: 0.5px solid var(--border);
+  background: var(--bg3);
+  padding: 1.5rem 0;
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+}
+.sidebar-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text3);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 0 1.25rem;
+  margin-bottom: 6px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 1.25rem;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text2);
+  transition: all .15s;
+  border-right: 2px solid transparent;
+  border: none;
+  background: none;
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  text-align: left;
+}
+.nav-item:hover { background: var(--bg); color: var(--text); }
+.nav-item.active { background: var(--accent-bg); color: var(--accent); font-weight: 500; }
+.nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.sidebar-divider { height: 0.5px; background: var(--border2); margin: 12px 1.25rem; }
+
+/* ── CONTENT ── */
+.content { flex: 1; padding: 2rem; max-width: 800px; }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+.panel-title { font-family: 'Instrument Serif', serif; font-size: 22px; margin-bottom: 4px; }
+.panel-desc { font-size: 13px; color: var(--text2); margin-bottom: 1.5rem; }
+
+.input-label { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; }
+.input-group { margin-bottom: 1rem; }
+
+textarea, input[type="text"], select {
+  width: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  background: var(--bg3);
+  color: var(--text);
+  resize: vertical;
+  outline: none;
+  transition: border-color .15s;
+}
+textarea:focus, input[type="text"]:focus, select:focus { border-color: var(--accent); }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.tag {
+  font-size: 12px;
+  padding: 4px 11px;
+  border-radius: 20px;
+  border: 0.5px solid var(--border);
+  cursor: pointer;
+  background: var(--bg3);
+  color: var(--text2);
+  transition: all .15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.tag:hover, .tag.sel { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.btn-gen {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: opacity .15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.btn-gen:hover { opacity: .88; }
+.btn-gen:disabled { opacity: .4; cursor: not-allowed; }
+
+.result-box {
+  margin-top: 1rem;
+  background: var(--bg3);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  min-height: 80px;
+}
+.result-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: 8px;
+}
+.result-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+.result-placeholder { color: var(--text3); font-style: italic; }
+
+.dots { display: none; text-align: center; padding: 1rem 0; }
+.dots span {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin: 0 3px;
+  animation: pulse 1.2s infinite;
+  opacity: .4;
+}
+.dots span:nth-child(2) { animation-delay: .2s; }
+.dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes pulse { 0%,80%,100%{opacity:.4;transform:scale(.8)} 40%{opacity:1;transform:scale(1)} }
+
+.action-row {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 0.5px solid var(--border2);
+}
+.btn-sm {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all .15s;
+  border: 0.5px solid var(--border);
+  background: none;
+  color: var(--text2);
+}
+.btn-sm:hover { background: var(--bg2); }
+.btn-sm.green { color: var(--accent); border-color: rgba(45,90,61,0.3); }
+.btn-sm.green:hover { background: var(--accent-bg); }
+
+/* ── HISTORY ── */
+.hist-section { margin-top: 1.5rem; }
+.hist-title { font-size: 12px; font-weight: 500; color: var(--text3); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .06em; }
+.hist-item {
+  padding: 10px 12px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: all .15s;
+  background: var(--bg3);
+}
+.hist-item:hover { background: var(--bg2); }
+.hist-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.hist-badge { font-size: 11px; color: var(--accent); font-weight: 500; }
+.hist-time { font-size: 11px; color: var(--text3); }
+.hist-preview { font-size: 12px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hist-del { font-size: 11px; color: var(--danger); background: none; border: none; cursor: pointer; padding: 0 4px; font-family: 'DM Sans', sans-serif; margin-left: 8px; }
+
+/* ── CHAT ── */
+.chat-msgs {
+  min-height: 220px;
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 1rem;
+  background: var(--bg3);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  margin-bottom: 10px;
+}
+.bubble {
+  padding: 9px 13px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  max-width: 80%;
+  white-space: pre-wrap;
+}
+.bubble.ai { background: var(--bg2); align-self: flex-start; color: var(--text); }
+.bubble.user { background: var(--accent); color: #fff; align-self: flex-end; }
+.chat-row { display: flex; gap: 8px; }
+.chat-row input { flex: 1; }
+
+/* ── SAVED TAB ── */
+.saved-card {
+  background: var(--bg3);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 10px;
+}
+.saved-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.saved-badge {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 500;
+}
+.saved-time { font-size: 11px; color: var(--text3); }
+.saved-text { font-size: 13px; color: var(--text); line-height: 1.7; max-height: 120px; overflow: hidden; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 14px; }
+.empty-state div { font-size: 32px; margin-bottom: 8px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  .sidebar { display: none; }
+  .content { padding: 1rem; }
+  .row2 { grid-template-columns: 1fr; }
+  .topbar { padding: 0 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div class="auth-wrap" id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">Solo<span>AI</span></div>
+    <div class="auth-tagline">1인 창업자를 위한 AI 마케팅 도구</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login',this)">로그인</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup',this)">회원가입</button>
+    </div>
+
+    <div id="login-form">
+      <div class="field"><label>이메일</label><input type="text" id="l-email" placeholder="you@example.com"></div>
+      <div class="field"><label>비밀번호</label><input type="password" id="l-pw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn-main" onclick="doLogin()">로그인</button>
+      <div class="auth-err" id="l-err"></div>
+      <div class="demo-hint">데모 계정: demo@soloai.kr / demo1234</div>
+    </div>
+
+    <div id="signup-form" style="display:none">
+      <div class="field"><label>브랜드 / 이름</label><input type="text" id="s-name" placeholder="예: 불멍 캔들"></div>
+      <div class="field"><label>이메일</label><input type="text" id="s-email" placeholder="you@example.com"></div>
+      <div class="field"><label>비밀번호 (6자 이상)</label><input type="password" id="s-pw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')doSignup()"></div>
+      <button class="btn-main" onclick="doSignup()">가입하기</button>
+      <div class="auth-err" id="s-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="topbar-logo">Solo<span>AI</span></div>
+    <div class="topbar-right">
+      <span class="user-name" id="uname"></span>
+      <div class="avatar" id="uavatar">?</div>
+      <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <nav class="sidebar">
+      <div class="sidebar-label">AI 도구</div>
+      <button class="nav-item active" onclick="switchTab('content',this)"><span class="nav-icon">✦</span> 콘텐츠 생성</button>
+      <button class="nav-item" onclick="switchTab('marketing',this)"><span class="nav-icon">◈</span> 마케팅 카피</button>
+      <button class="nav-item" onclick="switchTab('product',this)"><span class="nav-icon">◉</span> 상세페이지</button>
+      <button class="nav-item" onclick="switchTab('chat',this)"><span class="nav-icon">◎</span> 고객 응대봇</button>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-label">내 작업</div>
+      <button class="nav-item" onclick="switchTab('saved',this)"><span class="nav-icon">☆</span> 저장함</button>
+    </nav>
+
+    <div class="content">
+
+      <!-- 콘텐츠 생성 -->
+      <div id="panel-content" class="panel active">
+        <div class="panel-title">콘텐츠 생성</div>
+        <div class="panel-desc">SNS, 블로그 포스팅 문구를 AI가 즉시 작성해드려요.</div>
+        <div class="input-group">
+          <div class="input-label">플랫폼 선택</div>
+          <div class="tag-row" id="tags-platform">
+            <span class="tag sel" onclick="selTag(this,'platform')">인스타그램</span>
+            <span class="tag" onclick="selTag(this,'platform')">블로그</span>
+            <span class="tag" onclick="selTag(this,'platform')">스레드</span>
+            <span class="tag" onclick="selTag(this,'platform')">링크드인</span>
+            <span class="tag" onclick="selTag(this,'platform')">유튜브 설명</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">주제 또는 제품/서비스</div>
+          <textarea id="c-topic" rows="3" placeholder="예: 핸드메이드 라벤더 캔들 신제품 출시"></textarea>
+        </div>
+        <div class="row2">
+          <div class="input-group">
+            <div class="input-label">톤</div>
+            <select id="c-tone">
+              <option>친근하고 감성적</option>
+              <option>전문적이고 신뢰감</option>
+              <option>유머러스하고 가벼운</option>
+              <option>세련되고 미니멀</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <div class="input-label">해시태그</div>
+            <select id="c-hash"><option>포함</option><option>제외</option></select>
+          </div>
+        </div>
+        <button class="btn-gen" onclick="generate('content')" id="btn-content">✦ 콘텐츠 생성하기</button>
+        <div class="result-box">
+          <div class="result-label">생성 결과</div>
+          <div class="dots" id="dots-content"><span></span><span></span><span></span></div>
+          <div class="result-text result-placeholder" id="txt-content">플랫폼과 주제를 입력하고 생성 버튼을 누르세요.</div>
+          <div class="action-row" id="act-content">
+            <button class="btn-sm" onclick="copyTxt('txt-content',this)">복사</button>
+            <button class="btn-sm green" onclick="saveTxt('content','콘텐츠',this)">저장하기</button>
+          </div>
+        </div>
+        <div class="hist-section" id="hist-content"></div>
+      </div>
+
+      <!-- 마케팅 카피 -->
+      <div id="panel-marketing" class="panel">
+        <div class="panel-title">마케팅 카피</div>
+        <div class="panel-desc">광고 유형별 카피를 3가지 버전으로 생성해요.</div>
+        <div class="input-group">
+          <div class="input-label">광고 유형</div>
+          <div class="tag-row" id="tags-adtype">
+            <span class="tag sel" onclick="selTag(this,'adtype')">배너 광고</span>
+            <span class="tag" onclick="selTag(this,'adtype')">구글 검색광고</span>
+            <span class="tag" onclick="selTag(this,'adtype')">카카오 알림톡</span>
+            <span class="tag" onclick="selTag(this,'adtype')">이메일 제목</span>
+            <span class="tag" onclick="selTag(this,'adtype')">문자 메시지</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">제품/서비스 및 핵심 혜택</div>
+          <textarea id="m-input" rows="3" placeholder="예: 1인 창업자용 AI 마케팅 도구, 월 9,900원 무제한 생성"></textarea>
+        </div>
+        <div class="input-group">
+          <div class="input-label">타겟 고객</div>
+          <input type="text" id="m-target" placeholder="예: 온라인 판매 시작한 30대 1인 창업자">
+        </div>
+        <button class="btn-gen" onclick="generate('marketing')" id="btn-marketing">◈ 카피 3가지 생성하기</button>
+        <div class="result-box">
+          <div class="result-label">생성 결과</div>
+          <div class="dots" id="dots-marketing"><span></span><span></span><span></span></div>
+          <div class="result-text result-placeholder" id="txt-marketing">광고 유형과 제품 정보를 입력하세요.</div>
+          <div class="action-row" id="act-marketing">
+            <button class="btn-sm" onclick="copyTxt('txt-marketing',this)">복사</button>
+            <button class="btn-sm green" onclick="saveTxt('marketing','마케팅 카피',this)">저장하기</button>
+          </div>
+        </div>
+        <div class="hist-section" id="hist-marketing"></div>
+      </div>
+
+      <!-- 상세페이지 -->
+      <div id="panel-product" class="panel">
+        <div class="panel-title">상세페이지 작성</div>
+        <div class="panel-desc">제품 정보를 입력하면 판매 문구를 완성해드려요.</div>
+        <div class="row2">
+          <div class="input-group">
+            <div class="input-label">제품명</div>
+            <input type="text" id="p-name" placeholder="예: 핸드메이드 소이 캔들">
+          </div>
+          <div class="input-group">
+            <div class="input-label">카테고리</div>
+            <select id="p-cat">
+              <option>라이프스타일/인테리어</option>
+              <option>식품/음료</option>
+              <option>뷰티/화장품</option>
+              <option>패션/잡화</option>
+              <option>디지털/소프트웨어</option>
+              <option>교육/강의</option>
+              <option>기타</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="input-label">핵심 특징 (3가지)</div>
+          <textarea id="p-feat" rows="3" placeholder="예: 국내산 콩 왁스 사용, 손으로 직접 제작, 천연 에센셜오일"></textarea>
+        </div>
+        <div class="input-group">
+          <div class="input-label">가격 및 용량/스펙</div>
+          <input type="text" id="p-price" placeholder="예: 18,000원 / 200ml / 연소시간 40시간">
+        </div>
+        <button class="btn-gen" onclick="generate('product')" id="btn-product">◉ 상세페이지 문구 생성하기</button>
+        <div class="result-box">
+          <div class="result-label">생성 결과</div>
+          <div class="dots" id="dots-product"><span></span><span></span><span></span></div>
+          <div class="result-text result-placeholder" id="txt-product">제품 정보를 입력하세요.</div>
+          <div class="action-row" id="act-product">
+            <button class="btn-sm" onclick="copyTxt('txt-product',this)">복사</button>
+            <button class="btn-sm green" onclick="saveTxt('product','상세페이지',this)">저장하기</button>
+          </div>
+        </div>
+        <div class="hist-section" id="hist-product"></div>
+      </div>
+
+      <!-- 고객 응대봇 -->
+      <div id="panel-chat" class="panel">
+        <div class="panel-title">고객 응대봇</div>
+        <div class="panel-desc">브랜드 정보를 입력하면 고객 질문에 자동으로 답변해요.</div>
+        <div class="input-group">
+          <div class="input-label">내 브랜드/제품 정보 (처음 한 번만)</div>
+          <textarea id="chat-ctx" rows="2" placeholder="예: 핸드메이드 캔들 브랜드 '불멍'. 배송 3-5일, 교환/환불 14일 이내, 카카오 채널 문의 가능"></textarea>
+        </div>
+        <div class="chat-msgs" id="chat-msgs">
+          <div class="bubble ai">안녕하세요! 무엇이 궁금하신가요? 😊</div>
+        </div>
+        <div class="chat-row">
+          <input type="text" id="chat-in" placeholder="고객 질문을 입력해보세요..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="btn-gen" onclick="sendChat()">전송</button>
+        </div>
+        <div class="tag-row" style="margin-top:10px">
+          <span class="tag" onclick="fillChat('배송은 얼마나 걸리나요?')">배송 기간</span>
+          <span class="tag" onclick="fillChat('환불이 가능한가요?')">환불 정책</span>
+          <span class="tag" onclick="fillChat('선물 포장 되나요?')">선물 포장</span>
+          <span class="tag" onclick="fillChat('재료가 뭔가요?')">원재료</span>
+        </div>
+      </div>
+
+      <!-- 저장함 -->
+      <div id="panel-saved" class="panel">
+        <div class="panel-title">저장함</div>
+        <div class="panel-desc" id="saved-count">저장된 콘텐츠를 불러오는 중...</div>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:1rem">
+          <button class="btn-sm" onclick="clearAll()">전체 삭제</button>
+        </div>
+        <div id="saved-list"></div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ── STATE ──
+let currentUser = null;
+let chatHistory = [];
+let selTags = { platform:'인스타그램', adtype:'배너 광고' };
+
+// ── AUTH ──
+function switchAuthTab(t, btn) {
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('login-form').style.display = t === 'login' ? 'block' : 'none';
+  document.getElementById('signup-form').style.display = t === 'signup' ? 'block' : 'none';
+}
+
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem('soloai_users') || '{}'); } catch { return {}; }
+}
+function saveUsers(u) { localStorage.setItem('soloai_users', JSON.stringify(u)); }
+
+function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pw = document.getElementById('l-pw').value;
+  document.getElementById('l-err').textContent = '';
+  if (!email || !pw) { document.getElementById('l-err').textContent = '이메일과 비밀번호를 입력하세요.'; return; }
+  if (email === 'demo@soloai.kr' && pw === 'demo1234') { loginUser({email, name:'데모 계정'}); return; }
+  const users = getUsers();
+  if (!users[email]) { document.getElementById('l-err').textContent = '가입되지 않은 이메일입니다.'; return; }
+  if (users[email].pw !== pw) { document.getElementById('l-err').textContent = '비밀번호가 올바르지 않습니다.'; return; }
+  loginUser({email, name: users[email].name});
+}
+
+function doSignup() {
+  const name = document.getElementById('s-name').value.trim();
+  const email = document.getElementById('s-email').value.trim();
+  const pw = document.getElementById('s-pw').value;
+  document.getElementById('s-err').textContent = '';
+  if (!name || !email || !pw) { document.getElementById('s-err').textContent = '모든 항목을 입력하세요.'; return; }
+  if (pw.length < 6) { document.getElementById('s-err').textContent = '비밀번호는 6자 이상이어야 합니다.'; return; }
+  const users = getUsers();
+  if (users[email]) { document.getElementById('s-err').textContent = '이미 가입된 이메일입니다.'; return; }
+  users[email] = { name, pw };
+  saveUsers(users);
+  loginUser({email, name});
+}
+
+function loginUser(user) {
+  currentUser = user;
+  localStorage.setItem('soloai_session', JSON.stringify(user));
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('uname').textContent = user.name;
+  document.getElementById('uavatar').textContent = user.name.slice(0,2);
+  loadAllHistory();
+}
+
+function doLogout() {
+  currentUser = null;
+  chatHistory = [];
+  localStorage.removeItem('soloai_session');
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('chat-msgs').innerHTML = '<div class="bubble ai">안녕하세요! 무엇이 궁금하신가요? 😊</div>';
+}
+
+// auto-login
+(function() {
+  try {
+    const s = JSON.parse(localStorage.getItem('soloai_session'));
+    if (s && s.email) loginUser(s);
+  } catch {}
+})();
+
+// ── NAVIGATION ──
+function switchTab(id, btn) {
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
+  if (id === 'saved') loadSavedPanel();
+}
+
+function selTag(el, group) {
+  el.closest('.tag-row').querySelectorAll('.tag').forEach(t => t.classList.remove('sel'));
+  el.classList.add('sel');
+  selTags[group] = el.textContent.trim();
+}
+
+// ── GENERATE ──
+const APIKEY = ''; // Vercel 환경변수 또는 직접 입력
+
+async function callClaude(prompt, system) {
+  const body = {
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 1000,
+    messages: [{ role: 'user', content: prompt }]
+  };
+  if (system) body.system = system;
+
+  // ⚠️ API 키 설정 필요
+  // Vercel에 배포 시: 환경변수 ANTHROPIC_API_KEY 설정 후
+  // 아래 '/api/generate' 엔드포인트를 사용하세요.
+  // 테스트용으로 직접 API 키를 넣으려면 APIKEY 변수에 입력하세요.
+  const apiKey = APIKEY || window.__ANTHROPIC_KEY__;
+  if (!apiKey) {
+    return '⚠️ API 키가 설정되지 않았습니다.\n\nVercel 환경변수에 ANTHROPIC_API_KEY를 설정하거나,\n코드의 APIKEY 변수에 직접 입력해주세요.';
+  }
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify(body)
+  });
+  const d = await res.json();
+  return d.content?.[0]?.text || '결과를 가져오지 못했습니다.';
+}
+
+function setLoading(type, on) {
+  document.getElementById('dots-' + type).style.display = on ? 'block' : 'none';
+  document.getElementById('txt-' + type).style.display = on ? 'none' : 'block';
+  document.getElementById('btn-' + type).disabled = on;
+  if (!on) document.getElementById('act-' + type).style.display = 'flex';
+}
+
+async function generate(type) {
+  setLoading(type, true);
+  let prompt = '';
+
+  if (type === 'content') {
+    const p = selTags.platform;
+    const topic = document.getElementById('c-topic').value || '제품';
+    prompt = `SNS 콘텐츠 전문가로서 ${p} 포스팅 문구를 작성해주세요.\n주제: ${topic}\n톤: ${document.getElementById('c-tone').value}\n해시태그: ${document.getElementById('c-hash').value}\n이모지 적절히 사용, 한국어로 작성.`;
+  } else if (type === 'marketing') {
+    const at = selTags.adtype;
+    const inp = document.getElementById('m-input').value || '제품';
+    prompt = `퍼포먼스 마케팅 카피라이터로서 ${at} 카피를 3가지 버전으로 작성해주세요.\n제품: ${inp}\n타겟: ${document.getElementById('m-target').value || '일반 소비자'}\n각 버전은 번호를 붙이고 다른 각도로 (혜택/감성/문제해결), 한국어로.`;
+  } else if (type === 'product') {
+    const name = document.getElementById('p-name').value || '제품';
+    prompt = `상세페이지 카피라이터로서 아래 순서로 작성해주세요:\n1. 메인 헤드라인\n2. 서브 헤드라인\n3. 제품 소개 (3-4문장)\n4. 핵심 특징 3가지\n5. 구매 유도 문구\n\n제품명: ${name}\n카테고리: ${document.getElementById('p-cat').value}\n특징: ${document.getElementById('p-feat').value}\n가격/스펙: ${document.getElementById('p-price').value}\n한국어로.`;
+  }
+
+  try {
+    const result = await callClaude(prompt);
+    const el = document.getElementById('txt-' + type);
+    el.textContent = result;
+    el.classList.remove('result-placeholder');
+    addHistory(type, result);
+    renderHistory(type);
+  } catch(e) {
+    document.getElementById('txt-' + type).textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+  }
+  setLoading(type, false);
+}
+
+// ── HISTORY ──
+function ukey(suffix) {
+  return 'soloai_' + (currentUser?.email || 'guest').replace(/[@.]/g,'_') + '_' + suffix;
+}
+
+function addHistory(type, text) {
+  const key = ukey('hist_' + type);
+  let h = [];
+  try { h = JSON.parse(localStorage.getItem(key) || '[]'); } catch {}
+  h.unshift({ id: Date.now(), text, time: new Date().toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) });
+  if (h.length > 5) h = h.slice(0,5);
+  localStorage.setItem(key, JSON.stringify(h));
+}
+
+function renderHistory(type) {
+  const key = ukey('hist_' + type);
+  let h = [];
+  try { h = JSON.parse(localStorage.getItem(key) || '[]'); } catch {}
+  const el = document.getElementById('hist-' + type);
+  if (!el || !h.length) { if(el) el.innerHTML=''; return; }
+  el.innerHTML = `<div class="hist-title">최근 내역 (${h.length}건)</div>` +
+    h.map(item => `
+      <div class="hist-item" onclick="loadHist('${type}',${item.id})">
+        <div class="hist-top">
+          <span class="hist-badge">${type === 'content' ? '콘텐츠' : type === 'marketing' ? '마케팅 카피' : '상세페이지'}</span>
+          <span>
+            <span class="hist-time">${item.time}</span>
+            <button class="hist-del" onclick="event.stopPropagation();delHist('${type}',${item.id})">삭제</button>
+          </span>
+        </div>
+        <div class="hist-preview">${item.text.slice(0,90)}...</div>
+      </div>`).join('');
+}
+
+function loadHist(type, id) {
+  const key = ukey('hist_' + type);
+  try {
+    const h = JSON.parse(localStorage.getItem(key) || '[]');
+    const item = h.find(x => x.id === id);
+    if (item) {
+      const el = document.getElementById('txt-' + type);
+      el.textContent = item.text;
+      el.classList.remove('result-placeholder');
+      document.getElementById('act-' + type).style.display = 'flex';
+    }
+  } catch {}
+}
+
+function delHist(type, id) {
+  const key = ukey('hist_' + type);
+  try {
+    let h = JSON.parse(localStorage.getItem(key) || '[]');
+    h = h.filter(x => x.id !== id);
+    localStorage.setItem(key, JSON.stringify(h));
+    renderHistory(type);
+  } catch {}
+}
+
+function loadAllHistory() {
+  ['content','marketing','product'].forEach(t => renderHistory(t));
+}
+
+// ── SAVE ──
+function saveTxt(type, label, btn) {
+  const text = document.getElementById('txt-' + type).textContent;
+  if (!text || text.length < 10) return;
+  const key = ukey('saved');
+  let s = [];
+  try { s = JSON.parse(localStorage.getItem(key) || '[]'); } catch {}
+  s.unshift({ id: Date.now(), label, text, time: new Date().toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) });
+  localStorage.setItem(key, JSON.stringify(s));
+  btn.textContent = '저장됨!';
+  setTimeout(() => btn.textContent = '저장하기', 1500);
+}
+
+function loadSavedPanel() {
+  const key = ukey('saved');
+  let s = [];
+  try { s = JSON.parse(localStorage.getItem(key) || '[]'); } catch {}
+  document.getElementById('saved-count').textContent = `총 ${s.length}개의 저장된 콘텐츠`;
+  const el = document.getElementById('saved-list');
+  if (!s.length) {
+    el.innerHTML = '<div class="empty-state"><div>☆</div>아직 저장된 콘텐츠가 없어요.<br>생성 후 저장하기 버튼을 눌러보세요.</div>';
+    return;
+  }
+  el.innerHTML = s.map(item => `
+    <div class="saved-card">
+      <div class="saved-top">
+        <span class="saved-badge">${item.label}</span>
+        <span style="display:flex;align-items:center;gap:10px">
+          <span class="saved-time">${item.time}</span>
+          <button class="hist-del" onclick="delSaved(${item.id})">삭제</button>
+        </span>
+      </div>
+      <div class="saved-text">${item.text.slice(0,300)}${item.text.length>300?'...':''}</div>
+      <div style="margin-top:10px">
+        <button class="btn-sm" onclick="navigator.clipboard.writeText(${JSON.stringify(item.text)});this.textContent='복사됨!';setTimeout(()=>this.textContent='복사',1500)">복사</button>
+      </div>
+    </div>`).join('');
+}
+
+function delSaved(id) {
+  const key = ukey('saved');
+  try {
+    let s = JSON.parse(localStorage.getItem(key) || '[]');
+    s = s.filter(x => x.id !== id);
+    localStorage.setItem(key, JSON.stringify(s));
+    loadSavedPanel();
+  } catch {}
+}
+
+function clearAll() {
+  if (!confirm('저장된 콘텐츠를 모두 삭제하시겠습니까?')) return;
+  localStorage.setItem(ukey('saved'), '[]');
+  loadSavedPanel();
+}
+
+// ── COPY ──
+function copyTxt(id, btn) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent);
+  btn.textContent = '복사됨!';
+  setTimeout(() => btn.textContent = '복사', 1500);
+}
+
+// ── CHAT ──
+async function sendChat() {
+  const input = document.getElementById('chat-in').value.trim();
+  if (!input) return;
+  const ctx = document.getElementById('chat-ctx').value;
+  const msgs = document.getElementById('chat-msgs');
+
+  const ub = document.createElement('div');
+  ub.className = 'bubble user';
+  ub.textContent = input;
+  msgs.appendChild(ub);
+  document.getElementById('chat-in').value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+  chatHistory.push({ role: 'user', content: input });
+
+  const ab = document.createElement('div');
+  ab.className = 'bubble ai';
+  ab.textContent = '...';
+  msgs.appendChild(ab);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    const apiKey = APIKEY || window.__ANTHROPIC_KEY__;
+    const body = {
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: `친절하고 전문적인 고객 응대 챗봇입니다.\n브랜드 정보: ${ctx || '정보 없음'}\n간결하고 친절하게 한국어로 답변하세요. 모르는 내용은 담당자 확인 후 연락드리겠다고 안내하세요.`,
+      messages: chatHistory
+    };
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey || '',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify(body)
+    });
+    const d = await res.json();
+    const reply = d.content?.[0]?.text || '오류가 발생했습니다.';
+    ab.textContent = reply;
+    chatHistory.push({ role: 'assistant', content: reply });
+  } catch {
+    ab.textContent = 'API 키를 설정해주세요.';
+  }
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function fillChat(t) {
+  document.getElementById('chat-in').value = t;
+  sendChat();
+}
+</script>
+</body>
+</html>
